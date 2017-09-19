@@ -1,0 +1,150 @@
+==========================
+I. Compiling under Win32:
+==========================
+
+a. compiling IGL:
+-----------------
+To compile you need Visual C++, version 6 or higher. Just open IGL.dsw
+which contains all project files for compiling IGL, Panel Library and
+Electropaint. Dependencies have also been set, so just select "ep" as
+your active project and start the build (press F7). This should successfully
+build everything with loads of warnings - Panel Library and Electropaint
+were written in the 80's on/for SGI machines and compilers aren't so forgiving
+anymore.
+
+b. compiling other IrisGL programs:
+-----------------------------------
+This is a bit trickier. The form of most IrisGL programs written was
+something like this:
+
+main ()
+{
+    ... /* create windows etc. */
+
+    for (;;)
+    {
+        <check for queued event> or <poll>
+        <redraw>
+    }
+}
+
+As you probably know, Win32 programs are a bit different. For starters,
+the program's entry point isn't main() anymore, it's WinMain():
+
+WinMain ()
+{
+    ... /* create windows etc. */
+
+    for (;;)
+    {
+        if/while (PeekMessage ())
+        {
+            TranslateMessage ();
+            DispatchMessage ();
+        }
+
+        <redraw>
+    }
+}
+
+IGL abuses the fact that WinMain() is the entry point, as it provides it's
+own WinMain(), which then calls the 'real' main() function provided by the
+program. In simplified form:
+
+WinMain ()
+{
+    <initialize IGL>
+    <setup OpenGL>
+    return (main ());       /* main() is provided by the program! */
+}
+
+
+So now we have a problem. When main() is called, it doesn't call the
+TranslateMessage()/DispatchMessage() pair, which are essential if our
+window is to receive any events at all. When you call DispatchMessage(),
+Win32 calls a user-provided callback function, which is used for processing
+window/input events. If you don't process these events, the window is not
+refreshed, doesn't receive keyboard/mouse events etc. In other words, it is DEAD.
+To solve this problem, the program's source code has to be slightly changed.
+IGL provides a macro, which does the event processing. It is called IGL_MSG_PROCESS
+and needs to be inserted somewhere in the code. The question is where: if you
+are lucky, you only need to add one IGL_MSG_PROCESS, and that is just after the
+for(;;)/while(1). Example:
+
+main ()
+{
+    ... /* create windows etc. */
+
+    for (;;)
+    {
+        IGL_MSG_PROCESS
+        <original code>
+    }
+}
+
+If there are more such loops present, you have to change all of them. Sorry,
+but there isn't any other way this can be done. Check the 'examples' directory...
+
+NOTE: in IGL 0.1.6 there were two macros, IGL_MSG_BEGIN and IGL_MSG_END. They are
+still present for compatibility reasons.
+
+
+=========================
+II. Compiling under X11:
+=========================
+
+a. compiling IGL:
+-----------------
+To compile you need OpenGL/Mesa, GLU and GLX libraries and header files.
+As far as I know, this is only available on Linux, BSD and SGI machines.
+And if you have an SGI machine, you don't need IGL, so only Linux/BSD remain. =)
+You can then try running 'make' in the top directory to build IGL. If
+something fails (Makefile was written with haste), you'll need to install
+the appropriate libraries and/or edit the Makefile - usually only the path
+to X11/GL includes needs to be changed. If you cannot find the problem,
+you can contact me and I'll try to help.
+To build the Panel Library, go into src/panel and type 'make'. To build
+Electropaint, go into src/panel/D.app and type 'make'. Note that you need
+IGL and Panel Library built before you build Electropaint.
+
+b. compiling other IrisGL programs:
+-----------------------------------
+This differs a bit from Win32. On UN*X systems, the main() function remains
+the entry point. So to be able to initialize IGL before main() is called, we need
+a linker/compiler option to specify the real program entry point. For GCC this
+option is '-e' and IGL's entry point is igl_X11main(). (see Makefile for an example)
+The problem of event processing remains, so we need to insert IGL_MSG_PROCESS as well.
+Here's an overview of this (see Win32 section for more information):
+
+igl_X11main ()  /* our entry point */
+{
+    <initialize IGL>
+    <setup OpenGL>
+    return (main ());       /* main() is provided by the program! */
+}
+
+main () /* the real main */
+{
+    ... /* create windows etc. */
+
+    for (;;)
+    {
+        IGL_MSG_PROCESS
+        <original code>
+    }
+}
+
+
+
+====================
+III. Miscellaneous:
+====================
+
+a. Slackware 8.2:
+-----------------
+Although Slackware is IMHO the best Linux distribution, its compiler/preprocessor contains
+an absolutely crappy bug/feature. Since I usually program in Windows, all the sources' lines
+end with <CR><LF>. This by itself is not a problem, UNLESS the sources contain macros which
+expand over a few lines. Since IGL contains such macros, the header files have to be changed
+so the lines end with <LF> (sorry).
+

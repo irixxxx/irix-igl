@@ -1,0 +1,63 @@
+/***********************************************************************
+    Panel Library/Electropaint Copyright (c) 1986 David A. Tristram.
+    Electropaint (TM) is a Registered U.S. Trademark of Tristram Visual.
+    Tristram Visual can be contacted at www.tristram.com.
+************************************************************************/ 
+
+Here's a quick explanation on how to run/use Electropaint:
+
+Win32 notes:
+    When run, you will notice that the control panel window doesn't
+    respond correctly to mouse clicks. To fix it, *slightly* reduce
+    the window's width and then height and try again. Sometimes the
+    labels disappear after resizing, but this can be fixed by (again)
+    fiddling with resize.
+
+
+Brief explanation of slider acronyms in the control panel:
+whl     -   wheel (type of rotation)
+spn     -   spin (type of rotation)
+flp     -   flip (type of rotation)
+arm     -   arm (type of rotation)
+wrst    -   wrist (type of rotation)
+sz      -   size
+zoom    -   zoom
+twst    -   twist (type of rotation)
+spd     -   speed
+n       -   max number of visible triangles (?)
+rat     -   color change rate
+rng     -   colormap range
+
+IRIS_GT version has an additional control panel for colors.
+
+
+(multi-)slider structure:
+ ___
+| R |       reset button
+|---|
+| X |       change slider type (wrap or bounce)
+|---|
+|sld|       a small horizontal slider which animates the main slider
+|---|
+|hhh|       maximum slider value
+|   |
+|   |
+|sss|       current slider value
+|   |
+|   |
+|lll|       minimum slider value
+|___|
+|lbl|       slider label
+'---'
+
+Electropaint also features a script recorder/player which you can
+use to record your own command sequence and then play it back again.
+Scripting is possibly the 'most important' reason why Electropaint
+astounds everyone. On SGI machines, later versions incorporated a
+default script, which could be dumped and read back as ASCII text.
+This version does this in binary, so you can't see what's going on
+in the background. (I might - someday - change it to read/write
+ASCII files, but don't count on it. You're better off writing it
+yourself =).
+
+

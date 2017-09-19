@@ -1,0 +1,188 @@
+IGL is an Open Source drop-in replacement for IrisGL using OpenGL under X11. It
+implements about 450 functions of the original IrisGL library from SGI, and has
+stubs for about 80 more (mostly legacy stuff, with the notable exception of
+multisampling, feedback, and ilbuffer, which are all unimplemented).
+
+It also supports a decent subset of functions from libfm, the SGI font manager.
+
+As a side effect, you also get networking capabilities beyond those SGI offered
+with its dgl approach, since that only ran on SGI systems.
+
+
+IGL was originally written by Matevz Bradac as an IrisGL to OpenGL wrapper for
+Windows and X11. I used his work as a basis for my work, abandoning the Windows
+support on the way, as it wasn't needed for my goals. However, I retained and
+maintained the PLATFORM_X11 markers, such that any interested party should be
+able to resurrect Windows support if needed.
+
+See his original readme file attached at the end of this file. I also kept the
+original docs directory, so you might read that for further information.
+
+Current version is 0.4.2.
+
+
+IGL was tested on SGI hardware with as much software using IrisGL as I could
+get my hands on, using IGL as a drop-in replacement for the original IrisGL
+and a xubuntu linux system as display.
+
+Since this approach is still using SGI's original OpenGL libraries, it is
+unfortunately limited to a rather old version of OpenGL, version 1.2. It might
+not run on some of the original SGI hardware, since older SGI graphics hardware
+is only supporting OpenGL 1.1, while igl makes use of 1.2 features.
+(Yes, I know, it's really ancient. OpenGL 1.2 was released in another century!)
+
+As a side note, IrisGL was also available on AIX system from IBM. However, as
+I don't have access neither to hardware nor to software supporting this, I
+can't make any statement as to whether IGL may work with that or not, although
+some of the AIX extensions to GL are implemented,
+
+Nonetheless, IGL also compiles and runs on todays linux systems, as long as it
+is compiled for 32 bit (see below), and X and OpenGl is available.
+
+
+Compiling:
+==========
+I guess IrisGL was specified at times where 64 bit systems weren't fathomable.
+Its data type usage restricts it to 32 bit, hence you need to install a
+compiler capable of producing 32 bit binaries. See the tutorials available for
+this on the net, or just install a 32 bit system somewhere.
+Don't even think about a 64 bit version. AFAIK even SGI never provided one.
+
+You must have installed X11, OpenGL, GLX and GLU libraries and headers.
+
+On an x86 linux system run make like this:
+	make ABI=-m32
+
+On IRIX, use gcc. Don't bother with the MIPSpro compilers, they are just too
+ancient (although I took some care that it's basically possible to compile IGL
+at least in n32 mode with it). To produce both o32 and n32 versions of IGL,
+you need to run make twice:
+	make MIPSABI=32 LIBDIR=lib && make MIPSABI=n32 LIBDIR=lib32
+
+On other systems, determine which ABI switch is needed to enforce a 32 bit
+build, and use that for ABI in the make arguments.
+
+
+Install:
+========
+Target files are installed in $INSTALLDIR/{include|$LIBDIR} by running
+	make install ABI=-m32
+On IRIX, install IGL with
+	make install MIPSABI=32 LIBDIR=lib
+	make install MIPSABI=n32 LIBDIR=lib32
+The default INSTALLDIR is /usr/local, which can be changed by adding
+INSTALLDIR=<path> to the make parameters.
+
+
+Usage:
+======
+Compile and link your software with IGL, or, in case of precompiled binaries,
+add $INSTALLDIR/lib and/or $INSTALLDIR/lib32 to your LD_LIBRARY_PATH and
+run your software. It should now use the IGL version of libgl.so and libfm.so.
+
+Enable remote access for your X server, and use xhost to allow access for your
+IGL system. Also enable indirect GLX contexts. Note, however, that both may
+present potential security issues.
+
+The font manager has a built-in font list to map the SGI font names to X11
+names. Only fonts that could be accessed by the names in that font list can be
+used by the font manager. Either get these fonts from /usr/lib/X11/fonts/Type1
+on your SGI, or map those fonts you don't have to other names.
+
+IGL has some environment variables you can use to control some aspects of it:
+
+IGL_WINSIZE
+    default size of new windows (default 100x100)
+IGL_FONT
+    system font, font(0) (default -*-fixed-medium-r-normal-*-14)
+IGL_COMPAT
+    set "SOFTATTACH" and/or "SLOWMAPCOLORS" compatibility option (default "")
+IGL_NOLAYERS
+    turn off layer support, layers will not be visible
+IGL_GVERSION
+    set the graphics type gversion() should return (default GL4DIMP)
+IGL_YIELD
+    sleep time if event queue is empty in qtest() (microseconds, default 1000)
+IGL_SCRBOX
+    rectangle to return in getscrbox(), which is not supported in OpenGL
+    ("<left>,<right>,<bottom>,<top>", defaults to viewport dimensions)
+IGL_VERSION
+    print IGL's version information
+IGL_DEBUG
+    provide function tracing if IGL has been compiled with -DDEBUG (default 0)
+XSCREENSAVER_WINDOW
+    special support for this, allowing electropaint to be run remotely as a
+    screen saver :-)
+
+
+Known Problems:
+===============
+- A lot of IrisGL stuff can't be fully emulated on OpenGL, since OpenGL isn't
+supporting it (e.g. PYM_HOLLOW, depthcueing, concave() etc). This is documented
+in the source code with a NOTE explaining the restrictions.
+
+- Another lot of IrisGL stuff can't easily be emulated, because the OpenGL
+client version on IRIX is way too old (e.g. TX_SHARPEN, TX_DETAIL, shadow maps).
+
+- IGL has no real colormap mode. Color maps are internally emulated onto an
+RGB visual. So, no blinking, no changing color map entries for visual effects,
+no reading of colormap pixel data, and so on. However, drawing color indexed
+pixels is supported, with the possible exception of ranges (lshaderange() etc).
+
+- support for writemasks is very limited, partly because OpenGL doesn't provide
+support for this, partly because IGL doesn't provide support for this :-)
+
+- support for multibyte characters isn't implemented.
+
+- IGL isn't prepared for multithreading or multiprocessing. It works if only a
+single thread or process uses IrisGL calls, though.
+
+- A compositing window manager is needed for anything using overlays. Even then
+problems are to be expected. In that case you will most probably have an
+opaque overlay fully obscuring the NORMALDRAW layer. Try IGL_NOLAYERS.
+Layers are hard to do since SGI's X stuff is too old to support compositing,
+hence it was delegated to the window manager by reparenting all layers to the
+root windows. It depends on the window manager if this is working or not.
+
+- overlays are restricted in size to the window onto which they were generated.
+No support for extending layers over the whole screen using fullscreen().
+
+- underlay support isn't implemented yet.
+
+- graphics isn't pixel perfect. You'll note leftovers and glitches on and off.
+
+- IGL is rather unoptimized, since I focussed on the functionality. Don't expect
+too much.
+
+- the TODO list (currently only available in the source files) is still rather
+long. I may put up with some of the tasks in there, but OTOH, I might also
+spend some time with the family :-).
+As you are obviously interested in dusty old stuff as well, how about you?
+
+send bug reports, fixes etc to <derkub@gmail.com>
+Kai-Uwe Bloem
+
+
+Original IGL readme:
+==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==
+IGL is an Open Source port of IrisGL library to OpenGL (Win32/X11)
+Current version is 0.1.8.
+
+For information on compiling, installing etc., browse the 'docs' directory.
+Licensing information is contained in 'license.txt'.
+
+Additional information, bug reports, suggestions:
+email: matevzb@email.si
+URL: http://users.volja.net/wesley/igl.html
+
+Hope you like using it, as much as I did coding...
+Matevz Bradac
+==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==
+
+Original BUGS (what's left of it):
+==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==8<==
+This is a list of bugs and known problems:
+==========================================
+- one word: flickering
+- getgdesc() needs a window to function properly
+==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==>8==

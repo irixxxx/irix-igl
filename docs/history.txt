@@ -1,0 +1,55 @@
+version 0.1.8:
+==============
+- implemented IrisGL editable display lists (see 'new APIs' below and object.c for details)
+- getgdesc() is now almost complete
+- fixed the annoying mouse bug (see bugfixes below)
+- sort of rewritten the Makefile for X11, it should be a bit cleaner now.
+- new APIs implemented or changed to actually do something:
+    * display lists. everything but callfunc() seems to function, so now you can edit/tag/delete etc.
+      from now on, each API that can be executed in a display list comprises of 3 functions, e.g. for myfunc:
+      myfunc(), iglExec_myfunc() and iglObj_myfunc(). myfunc() is just a wrapper, which calls
+      either iglExec_myfunc() or iglObj_myfunc(), depending on whether we are executing or adding
+      to a display list. iglObj_myfunc() stores params on the display list and iglExec_myfunc()
+      does all the actual work.
+    * X11 version now supports menus (defpup() etc.). they seem to resemble SGI's menus somewhat...
+    * onemap()/multimap()
+    * greset()/ginit()/gexit()/gbegin()
+    * noport()
+    * scrmask()/getscrmask()
+    * defpattern()/setpattern()/getpattern()
+    * setpup()
+
+- bug fixes:
+    * MSINGLE matrix mode was changed, and it now uses GL_PROJECTION and not GL_MODELVIEW
+      as default mode. this seems to fix ep in IRIS_GT mode
+    * cpack(), wmpack() and czclear() - the packed color was in ABGR mode rather than in RGBA
+    * getbutton(), getvaluator() and getdev() - the valuators were reset to 0 after retrieving the value
+    * windows with empty strings as titles would not be created
+    * upon creation, the windows aren't resizable. call winconstraints() to enable this
+    * getgconfig() should now work correctly
+    * lmbind() can only be used in MVIEWING mode
+    * lighting is not enabled until both MATERIAL and LMODEL are enabled
+    * mmode(MSINGLE) resets all matrix stacks
+    * matrix[16] is the same as matrix[4][4] (memory-wise). stupid me to miss this one...
+    * clipplane() is not available in MSINGLE matrix mode
+    * tevdef() didn't function (only TV_BLEND, TV_DECAL, TV_ALPHA and TV_MODULATE are mutually exclusive)
+    * keepaspect() fixed, on X11 it now actually functions (Win32 has its own problems though)
+    * texdef2d() now seems to work, although not perfectly (IrisGL obscura)
+
+
+version 0.1.7:
+==============
+- IGL is now bundled with original Panel Library sources (including Electropaint)!!!!
+- X11 implementation! mostly everything, except for the menus...
+- fixes for C++ programs (additional casts, doubled symbols). thanks to Leopold Zyka
+- fullscrn()/endfullscrn() were most probably implemented incorrectly.
+  they've been changed, I still need an SGI machine =)
+- "System" font is used as a default on Win32, as opposed to "Arial" in 0.1.6
+- minsize()/maxsize() are now taken into account when resizing windows
+- several small bug fixes
+
+
+version 0.1.6:
+==============
+- initial public release
+

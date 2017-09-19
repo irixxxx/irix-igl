@@ -1,0 +1,14 @@
+This is a list of bugs and known problems:
+==========================================
+- IGL is by no means multi-threaded. it wasn't meant to be and it probably never will be
+- one word: flickering
+- window sizing is sometimes incorrect
+- a lot of APIs still not supported/implemented
+- QFULL event is not triggered when device queue is full
+- getgdesc() needs a window to function properly
+- IrisGL default settings for buffers, colors etc. should be set correctly
+  on Win32 and X11 platforms. (/me should study the man pages some more)
+- menus: if a menu has a submenu and no IDs were user-specified, both of the menus have
+  same IDs and therefore clicking on a submenu item causes top-level menu command to execute.
+  note that i have yet to find out whether this is a bug or not...
+
