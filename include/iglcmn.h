@@ -49,7 +49,7 @@ extern "C" {
 #define IGL_MAXMATRICES         16          /* max curve matrices available */
 #define IGL_MAXLMDEFS           64          /* max material/light/lightmodel definitions */
 #define IGL_MAXTEVDEFS          16          /* max tevdef()'s */
-#define IGL_MAXTEXDEFS          128         /* max texdef()'s */
+#define IGL_MAXTEXDEFS          256         /* max texdef()'s */
 #define IGL_MAXMENUS            32          /* max menus available */
 #define IGL_MAXFONTS            16          /* max raster fonts available */
 
